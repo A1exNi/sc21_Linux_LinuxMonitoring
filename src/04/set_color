@@ -1,0 +1,139 @@
+#!/bin/bash
+
+function set_color {
+  if [ $1 -eq 0 ]
+  then
+    color="\033[95m"
+  elif [ $1 -eq 1 ]
+  then
+    color="\033[97m"
+  elif [ $1 -eq 2 ]
+  then
+    color="\033[91m"
+  elif [ $1 -eq 3 ]
+  then
+    color="\033[92m"
+  elif [ $1 -eq 4 ]
+  then
+    color="\033[96m"
+  elif [ $1 -eq 5 ]
+  then
+    color="\033[95m"
+  elif [ $1 -eq 6 ]
+  then
+    color="\033[30m"
+  fi
+  echo $color
+}
+
+function set_fon {
+  if [ $1 -eq 0 ]
+  then
+   color="\033[40m"
+  elif [ $1 -eq 1 ]
+  then
+    color="\033[107m"
+  elif [ $1 -eq 2 ]
+  then
+    color="\033[101m"
+  elif [ $1 -eq 3 ]
+  then
+    color="\033[102m"
+  elif [ $1 -eq 4 ]
+  then
+    color="\033[106m"
+  elif [ $1 -eq 5 ]
+  then
+    color="\033[105m"
+  elif [ $1 -eq 6 ]
+  then
+    color="\033[40m"
+  fi
+  echo $color
+}
+
+function get_color {
+  if [ $1 -eq 1 ]
+  then
+    color="white"
+  elif [ $1 -eq 2 ]
+  then
+    color="red"
+  elif [ $1 -eq 3 ]
+  then
+    color="green"
+  elif [ $1 -eq 4 ]
+  then
+    color="blue"
+  elif [ $1 -eq 5 ]
+  then
+    color="purple"
+  elif [ $1 -eq 6 ]
+  then
+    color="black"
+  fi
+  echo $color
+}
+
+function get_color_name {
+  if [ $1 -eq 0 ]
+  then
+    color="purple"
+  else
+    color=$( get_color $@ )
+  fi
+  echo $color
+}
+
+function get_fon_name {
+  if [ $1 -eq 0 ]
+  then
+    color="black"
+  else
+    color=$( get_color $@ )
+  fi
+  echo $color
+}
+
+function get_color_from_conf {
+  file_name="./color.conf"
+  color1=0
+  color2=0
+  color3=0
+  color4=0
+  for line in $( cat $file_name )
+  do
+    IFS='='
+    read -a array <<< $line
+    if [ ${array[0]} = "column1_background" ]
+    then
+      color1=${array[1]}
+      if [[ $color1 -lt 0 ]] || [[ $color1 -gt 6 ]]
+      then
+        color1=0
+      fi
+    elif [ ${array[0]} = "column1_font_color" ]
+    then
+      color2=${array[1]}
+      if [[ $color2 -lt 0 ]] || [[ $color2 -gt 6 ]]
+      then
+        color2=0
+      fi
+    elif [ ${array[0]} = "column2_background" ]
+    then
+      color3=${array[1]}
+      if [[ $color3 -lt 0 ]] || [[ $color3 -gt 6 ]]
+      then
+        color3=0
+      fi
+    elif [ ${array[0]} = "column2_font_color" ]
+    then
+      color4=${array[1]}
+      if [[ $color4 -lt 0 ]] || [[ $color4 -gt 6 ]]
+      then
+        color4=0
+      fi
+    fi
+  done
+  echo $color1 $color2 $color3 $color4
+}

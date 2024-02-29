@@ -1,0 +1,21 @@
+#!/bin/bash
+function check_param {
+  error=0
+  if [ $# -ne 4 ]
+  then
+    error=1
+  else
+    for var in $@
+    do
+      if [[ var -lt 1 ]] || [[ var -gt 6 ]]
+      then
+        error=1
+      fi
+    done
+    if [[ $1 -eq $2 ]] || [[ $3 -eq $4 ]]
+    then
+      error=1
+    fi
+  fi
+  echo $error
+}

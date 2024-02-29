@@ -1,0 +1,15 @@
+#!/bin/bash
+function check_param {
+  error=0
+  if [ $# -ne 1 ]
+  then
+    error=1
+  else
+    str="$1"
+    if [ ${str: -1} != "/" ]
+    then
+      error=1
+    fi
+  fi
+  echo $error
+}

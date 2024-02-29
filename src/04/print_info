@@ -1,0 +1,118 @@
+#!/bin/bash
+source ./set_color
+
+SCALE=1024
+RESET="\033[0m"
+
+function print_hostname {
+  echo -e "$1$2HOSTNAME$RESET = $3$4$HOSTNAME$RESET"
+}
+
+function print_timezone {
+  echo -e "$1$2TIMEZONE$RESET = $3$4$( timedatectl | grep 'Time zone' | sed 's/Time zone://' )$RESET"
+}
+
+function print_user {
+  echo -e "$1$2USER$RESET = $3$4$USER$RESET"
+}
+
+function print_os {
+  echo -e "$1$2OS$RESET = $3$4$( cat /etc/issue )$RESET"
+}
+
+function print_date {
+  echo -e "$1$2DATE$RESET = $3$4$( date +'%d %B %Y %H:%M:%S' )$RESET"
+}
+
+function print_uptime {
+  echo -e "$1$2UPTIME$RESET = $3$4$( uptime -p )$RESET" 
+}
+
+function print_uptime_sec {
+  echo -e "$1$2UPTIME_SEC$RESET = $3$4$( awk '{print $1}' /proc/uptime )$RESET"
+}
+
+function print_ip {
+  echo -e "$1$2IP$RESET = $3$4$( /sbin/ifconfig | grep 'inet' | sed '1!d' | awk '{print $2}' )$RESET"
+}
+
+function print_mask {
+  echo -e "$1$2MASK$RESET = $3$4$( /sbin/ifconfig | grep 'inet' | sed '1!d' | awk '{print $4}' )$RESET"
+}
+
+function print_gateway {
+  echo -e "$1$2GATEWAY$RESET = $3$4$( ip route | grep 'default' | awk '{print $3}' )$RESET"
+}
+
+function print_ram_total {
+  RAM_TOTAL=$( vmstat -s | grep 'total memory' | awk '{print $1}' )
+  RAM_TOTAL_G=`echo "scale=2; $RAM_TOTAL / $SCALE / $SCALE" | bc`
+  echo -e "$1$2RAM_TOTAL$RESET = $3$4$RAM_TOTAL B $RAM_TOTAL_G GB$RESET"
+}
+
+function print_ram_used {
+  RAM_USED=$( vmstat -s | grep 'used memory' | awk '{print $1}' )
+  RAM_USED_G=`echo "scale=2; $RAM_USED / $SCALE / $SCALE" | bc`
+  echo -e "$1$2RAM_USED$RESET = $3$4$RAM_USED B $RAM_USED_G GB$RESET"
+}
+
+function print_ram_free {
+  RAM_FREE=$( vmstat -s | grep 'free memory' | awk '{print $1}' )
+  RAM_FREE_G=`echo "scale=2; $RAM_FREE / $SCALE / $SCALE" | bc`
+  echo -e "$1$2RAM_FREE$RESET = $3$4$RAM_FREE B $RAM_FREE_G GB$RESET"
+}
+
+function print_space_root {
+  SPACE_ROOT=$( df -hT | grep '/$' | awk '{print $3}' | sed -e 's/,/./' -e 's/G//' )
+  SPACE_ROOT_M=`echo "scale=2; $SPACE_ROOT * $SCALE" | bc`
+  echo -e "$1$2SPACE_ROOT$RESET = $3$4$SPACE_ROOT GB $SPACE_ROOT_M MB$RESET"
+}
+
+function print_space_root_used {
+  SPACE_ROOT_USED=$( df -hT | grep '/$' | awk '{print $4}' | sed -e 's/,/./' -e 's/G//' )
+  SPACE_ROOT_USED_M=`echo "scale=2; $SPACE_ROOT_USED * $SCALE" | bc`
+  echo -e "$1$2SPACE_ROOT_USED$RESET = $3$4$SPACE_ROOT_USED GB $SPACE_ROOT_USED_M MB$RESET"
+}
+
+function print_space_root_free {
+  SPACE_ROOT_FREE=$( df -hT | grep '/$' | awk '{print $5}' | sed -e 's/,/./' -e 's/G//' )
+  SPACE_ROOT_FREE_M=`echo "scale=2; $SPACE_ROOT_FREE * $SCALE" | bc`
+  echo -e "$1$2SPACE_ROOT_FREE$RESET = $3$4$SPACE_ROOT_FREE GB $SPACE_ROOT_FREE_M MB$RESET"
+}
+
+function get_default {
+  if [ $1 -eq 0 ] 
+  then 
+    number="default" 
+  else 
+    number=$1 
+  fi
+  echo $number
+}
+
+function print_config {
+  echo 
+  echo "Column 1 background = $( get_default $1 ) ($( get_color_name $1 ))"
+  echo "Column 1 font color = $( get_default $2 ) ($( get_fon_name $2 ))"
+  echo "Column 2 background = $( get_default $3 ) ($( get_color_name $3 ))"
+  echo "Column 2 font color = $( get_default $4 ) ($( get_fon_name $4 ))"
+}
+
+function print_info {
+  echo $( print_hostname $@ )
+  echo $( print_timezone $@ )
+  echo $( print_user $@ )
+  echo $( print_os $@ )
+  echo $( print_date $@ )
+  echo $( print_uptime $@ )
+  echo $( print_uptime_sec $@ )
+  echo $( print_ip $@ )
+  echo $( print_mask $@ )
+  echo $( print_gateway $@ )
+  echo $( print_ram_total $@ )
+  echo $( print_ram_used $@ )
+  echo $( print_ram_free $@ )
+  echo $( print_space_root $@ )
+  echo $( print_space_root_used $@ )
+  echo $( print_space_root_free $@ )
+}

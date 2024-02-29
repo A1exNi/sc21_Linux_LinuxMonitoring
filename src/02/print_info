@@ -1,0 +1,103 @@
+#!/bin/bash
+
+SCALE=1024
+
+function print_hostname {
+  echo HOSTNAME = $HOSTNAME
+}
+
+function print_timezone {
+  echo TIMEZONE = $( timedatectl | grep 'Time zone' | sed 's/Time zone://' )
+}
+
+function print_user {
+  echo USER = $USER
+}
+
+function print_os {
+  echo OS = $( cat /etc/issue )
+}
+
+function print_date {
+  echo DATE = $@
+}
+
+function print_uptime {
+  MIN=`echo "$1 / 60 % 60" | bc`
+  HOURS=`echo "$1 / 60 / 60 % 24" | bc`
+  DAYS=`echo "$1 / 60 / 60 / 24" | bc`
+  echo UPTIME = $DAYS days $HOURS hours $MIN minutes
+}
+
+function print_uptime_sec {
+  echo UPTIME_SEC = $@
+}
+
+function print_ip {
+  echo IP = $( /sbin/ifconfig | grep 'inet' | sed '1!d' | awk '{print $2}' )
+}
+
+function print_mask {
+  echo MASK = $( /sbin/ifconfig | grep 'inet' | sed '1!d' | awk '{print $4}' )
+}
+
+function print_gateway {
+  echo GATEWAY = $( ip route | grep 'default' | awk '{print $3}' )
+}
+
+function print_ram_total {
+  RAM_TOTAL=$( vmstat -s | grep 'total memory' | awk '{print $1}' )
+  RAM_TOTAL_G=`echo "scale=2; $RAM_TOTAL / $SCALE / $SCALE" | bc`
+  echo RAM_TOTAL = $RAM_TOTAL B $RAM_TOTAL_G GB
+}
+
+function print_ram_used {
+  #RAM_USED=$( vmstat -s | grep 'used memory' | awk '{print $1}' )
+  RAM_USED=$1
+  RAM_USED_G=`echo "scale=2; $RAM_USED / $SCALE / $SCALE" | bc`
+  echo RAM_USED	= $RAM_USED B $RAM_USED_G GB
+}
+
+function print_ram_free {
+  #RAM_FREE=$( vmstat -s | grep 'free memory' | awk '{print $1}' )
+  RAM_FREE=$1
+  RAM_FREE_G=`echo "scale=2; $RAM_FREE / $SCALE / $SCALE" | bc`
+  echo RAM_FREE	= $RAM_FREE B $RAM_FREE_G GB
+}
+
+function print_space_root {
+  SPACE_ROOT=$( df -hT | grep '/$' | awk '{print $3}' | sed -e 's/,/./' -e 's/G//' )
+  SPACE_ROOT_M=`echo "scale=2; $SPACE_ROOT * $SCALE" | bc`
+  echo SPACE_ROOT = $SPACE_ROOT GB $SPACE_ROOT_M MB
+}
+
+function print_space_root_used {
+  SPACE_ROOT_USED=$( df -hT | grep '/$' | awk '{print $4}' | sed -e 's/,/./' -e 's/G//' )
+  SPACE_ROOT_USED_M=`echo "scale=2; $SPACE_ROOT_USED * $SCALE" | bc`
+  echo SPACE_ROOT_USED 	= $SPACE_ROOT_USED GB $SPACE_ROOT_USED_M MB
+}
+
+function print_space_root_free {
+  SPACE_ROOT_FREE=$( df -hT | grep '/$' | awk '{print $5}' | sed -e 's/,/./' -e 's/G//' )
+  SPACE_ROOT_FREE_M=`echo "scale=2; $SPACE_ROOT_FREE * $SCALE" | bc`
+  echo SPACE_ROOT_FREE 	= $SPACE_ROOT_FREE GB $SPACE_ROOT_FREE_M MB
+}
+
+function print_info {
+  echo $( print_hostname )
+  echo $( print_timezone )
+  echo $( print_user )
+  echo $( print_os )
+  echo $( print_date $2 $3 $4 $5 )
+  echo $( print_uptime $7 )
+  echo $( print_uptime_sec $7 )
+  echo $( print_ip )
+  echo $( print_mask )
+  echo $( print_gateway )
+  echo $( print_ram_total )
+  echo $( print_ram_used $8)
+  echo $( print_ram_free $9)
+  echo $( print_space_root )
+  echo $( print_space_root_used )
+  echo $( print_space_root_free )
+}

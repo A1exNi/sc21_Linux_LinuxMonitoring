@@ -1,0 +1,147 @@
+#!/bin/bash
+
+function print_total_folders {
+  number_folders=$( find $1 -type d 2>/dev/null | wc -l )
+  echo "Total number of folders (include all nested ones) = $number_folders"
+}
+
+function print_5_top_folders {
+  echo "TOP 5 folders of maximum size arranged in descending order (path and size):"
+  IFS=$'\n'
+  count=1
+  for val in $( du -h $1 2>/dev/null | sort -hr )
+  do
+    if [ $count -le 5 ]
+    then	    
+      IFS=$'\t'
+      read -a array <<< $val
+      echo "$count - ${array[1]}, ${array[0]}"
+    else
+      break
+    fi
+    count=$(( $count + 1 ))
+  done
+}
+
+function print_total_files {
+  number_files=$( find $1 -type f 2>/dev/null | wc -l )
+  number_files=$(( $number_files + $( find $1 -type l 2>/dev/null | wc -l ) ))
+  echo "Total number of files = $number_files"
+}
+
+function print_files {
+  echo Number of:
+  number_conf=$( find $1 -type f -name "*.conf" 2>/dev/null | wc -l )
+  echo "Configuration files (with the .conf extendion) = $number_conf"
+  number_text=0
+  number_exe=0
+  number_arch=0
+  IFS=$'\n' 
+  for folder in $( find $1 -type d 2>/dev/null ) 
+  do
+    for file in $folder/* 
+    do
+      IFS=':'
+      read -a array <<< $( file $file )
+      if [ -x $file ] && [ -f $file ] && [[ ${array[1]} != *"symbolic link"* ]] 
+      then
+	number_exe=$(( $number_exe + 1 ))
+      elif [[ ${array[1]} = *"text"* ]] 
+      then
+        number_text=$(( $number_text + 1 ))
+      elif [[ ${array[1]} = *"archive"* ]] || [[ ${array[1]} = *"compressed"* ]] 
+      then
+        number_arch=$(( $number_arch + 1 ))
+      fi
+    done
+  done
+  echo "Text files = $number_text"
+  echo "Executable files = $number_exe"
+  number_log=$( find $1 -type f -name "*.log" 2>/dev/null | wc -l )
+  echo "Log files (with the extension .log) = $number_log"
+  echo "Archive files = $number_arch"
+  number_links=$( find $1 -type l 2>/dev/null | wc -l )
+  echo "Symbolic links = $number_links"
+}
+
+function get_type_file {
+#  file $1
+  IFS=':'
+  read -a array <<< $( file $1 )
+  if [ -x $1 ] 
+  then
+    type="exe"
+  elif [[ ${array[1]} = *"symbolic link"* ]]
+  then
+    type="link"
+  elif [[ ${array[1]} = *"text"* ]] 
+  then
+    type="text"
+  elif [[ ${array[1]} = *"archive"* ]] || [[ ${array[1]} = *"compressed"* ]] 
+  then
+    type="archive"
+  elif [[ $1 = *".log" ]] 
+  then
+    type="log"
+  elif [[ $1 = *".conf" ]] 
+  then
+    type="conf"
+  else
+    type="none"
+  fi
+  echo $type
+}
+
+function print_10_top_files {
+  echo "TOP 10 files of maximum size arranged in descending order (path, size and type):"
+  IFS=$'\n'
+  count=1
+  for val in $( du -ha $1 2>/dev/null | sort -hr ) 
+  do
+    if [ $count -le 10 ] 
+    then	    
+      IFS=$'\t'
+      read -a array <<< $val
+      if [ -f ${array[1]} ] 
+      then
+	type=$( get_type_file ${array[1]} )
+      	echo "$count - ${array[1]}, ${array[0]}, $type"
+        count=$(( $count + 1 ))
+      fi
+    else
+      break
+    fi
+  done
+}
+
+
+function print_10_top_exe {
+  echo "TOP 10 executable files of maximum size arranged in descending order (path, size and MD5 hash of file):"
+  IFS=$'\n'
+  count=1
+  for val in $( du -ha $1 2>/dev/null | sort -hr ) 
+  do
+    if [ $count -le 10 ] 
+    then	    
+      IFS=$'\t'
+      read -a array <<< $val
+      if [ -x ${array[1]} ] && [ -f ${array[1]} ] 
+      then
+	MD5=$( md5sum ${array[1]} | awk '{print $1}' )
+      	echo "$count - ${array[1]}, ${array[0]}, $MD5"
+        count=$(( $count + 1 ))
+      fi
+    else
+      break
+    fi
+  done
+}
+
+function print_info {
+  print_total_folders $@ 
+  print_5_top_folders $@
+  print_total_files $@
+  print_files $@
+  print_10_top_files $@
+  print_10_top_exe $@
+}

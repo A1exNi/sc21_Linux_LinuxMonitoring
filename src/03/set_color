@@ -1,0 +1,47 @@
+#!/bin/bash
+
+function set_color {
+  if [ $1 -eq 1 ]
+  then
+    color="\033[97m"
+  elif [ $1 -eq 2 ]
+  then
+    color="\033[91m"
+  elif [ $1 -eq 3 ]
+  then
+    color="\033[92m"
+  elif [ $1 -eq 4 ]
+  then
+    color="\033[96m"
+  elif [ $1 -eq 5 ]
+  then
+    color="\033[95m"
+  elif [ $1 -eq 6 ]
+  then
+    color="\033[30m"
+  fi
+  echo $color
+}
+
+function set_fon {
+  if [ $1 -eq 1 ]
+  then
+    color="\033[107m"
+  elif [ $1 -eq 2 ]
+  then
+    color="\033[101m"
+  elif [ $1 -eq 3 ]
+  then
+    color="\033[102m"
+  elif [ $1 -eq 4 ]
+  then
+    color="\033[106m"
+  elif [ $1 -eq 5 ]
+  then
+    color="\033[105m"
+  elif [ $1 -eq 6 ]
+  then
+    color="\033[40m"
+  fi
+  echo $color
+}
